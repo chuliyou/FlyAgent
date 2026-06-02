@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//j/develop/Java/**)",
+      "Read(//c/Program Files/Java/**)",
+      "Read(//c/Program Files \\(x86\\)/**)",
+      "Bash(\"J:/develop/Java/jdk-17.0.1/bin/java\" -jar J:/code/FlyAgent/target/flyagent.jar)",
+      "Bash(mvn *)",
+      "Bash(java -version)",
+      "Bash(javac -version)",
+      "Bash(\"/j/develop/Java/jdk-17.0.1/bin/java\" -version)",
+      "Bash(gh auth *)",
+      "Bash(where gh *)"
+    ]
+  }
+}

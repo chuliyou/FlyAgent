@@ -1,0 +1,4 @@
+com\flyagent\domain\message\MessageSerializationTest.class
+com\flyagent\domain\session\AgentSessionTest.class
+com\flyagent\infrastructure\deepseek\DeepSeekResponseParserTest.class
+com\flyagent\domain\chat\ChatRequestTest.class
