@@ -1,5 +1,7 @@
 package com.flyagent.domain.tool;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.List;
 
 /**
@@ -10,6 +12,7 @@ import java.util.List;
  * @author FlyAgent Team
  * @since 1.0
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class JsonSchemaProperty {
 
     private final String type;

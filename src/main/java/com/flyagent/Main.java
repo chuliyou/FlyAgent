@@ -3,9 +3,10 @@ package com.flyagent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flyagent.application.service.AgentAppService;
 import com.flyagent.application.service.SessionAppService;
+import com.flyagent.domain.agent.Agent;
+import com.flyagent.domain.agent.DefaultAgent;
 import com.flyagent.domain.chat.ChatModelPort;
 import com.flyagent.domain.tool.ApprovalHandler;
-import com.flyagent.domain.tool.ToolExecutionContext;
 import com.flyagent.domain.tool.ToolRegistry;
 import com.flyagent.domain.tool.WorkspaceGuard;
 import com.flyagent.infrastructure.config.AppConfig;
@@ -27,6 +28,8 @@ import com.flyagent.interfaces.cli.AgentCli;
  * <ol>
  *   <li>加载配置（环境变量）</li>
  *   <li>初始化 DeepSeek 客户端（infrastructure）</li>
+ *   <li>初始化工具层（infrastructure）</li>
+ *   <li>初始化 Agent + ReActLoop（domain）</li>
  *   <li>初始化应用服务（application）</li>
  *   <li>启动 CLI 交互循环（interfaces）</li>
  * </ol>
@@ -50,11 +53,7 @@ public class Main {
         ObjectMapper objectMapper = new ObjectMapper();
         ChatModelPort chatModel = new DeepSeekChatModel(dsConfig, objectMapper);
 
-        // 3. 初始化应用服务
-        SessionAppService sessionService = new SessionAppService();
-        AgentAppService agentService = new AgentAppService(chatModel, sessionService);
-
-        // 3.5 初始化工具层 —— 注册全部 5 个工具
+        // 3. 初始化工具层 —— 注册全部 5 个工具
         ToolRegistry toolRegistry = new ToolRegistryImpl();
         toolRegistry.registerAll(
                 new ReadFileTool(),
@@ -68,19 +67,18 @@ public class Main {
         String workspace = args.length > 0 ? args[0] : System.getProperty("user.dir");
         java.nio.file.Path workspacePath = java.nio.file.Path.of(workspace).toAbsolutePath().normalize();
 
-        // 4.5 构建工具执行上下文
-        WorkspaceGuard workspaceGuard = new WorkspaceGuard(workspacePath);
+        // 5. 初始化审批处理器
         ApprovalHandler approvalHandler = new ConsoleApprovalHandler();
-        ToolExecutionContext toolContext = ToolExecutionContext.builder(workspacePath)
-                .workspaceGuard(workspaceGuard)
-                .approvalHandler(approvalHandler)
-                .requireWriteApproval(true)
-                .requireShellApproval(true)
-                .build();
+        WorkspaceGuard workspaceGuard = new WorkspaceGuard(workspacePath);
 
-        // TODO: Inject toolRegistry and toolContext into AgentAppService when ReAct Loop is implemented
+        // 6. 初始化应用服务
+        SessionAppService sessionService = new SessionAppService();
 
-        // 5. 启动 CLI
+        // 7. 初始化 Agent（注入所有端口）
+        Agent agent = new DefaultAgent(chatModel, toolRegistry, sessionService, approvalHandler);
+        AgentAppService agentService = new AgentAppService(agent, sessionService);
+
+        // 8. 启动 CLI
         AgentCli cli = new AgentCli(agentService, sessionService, dsConfig, workspace);
         cli.start();
     }

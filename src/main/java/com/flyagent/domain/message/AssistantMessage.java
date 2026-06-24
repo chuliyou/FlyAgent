@@ -1,5 +1,7 @@
 package com.flyagent.domain.message;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.flyagent.domain.tool.ToolCall;
 
 import java.util.List;
@@ -12,6 +14,7 @@ import java.util.List;
  * @author FlyAgent Team
  * @since 1.0
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AssistantMessage implements Message {
 
     private final String content;
@@ -51,6 +54,7 @@ public class AssistantMessage implements Message {
         return content;
     }
 
+    @JsonProperty("tool_calls")
     public List<ToolCall> getToolCalls() {
         return toolCalls;
     }

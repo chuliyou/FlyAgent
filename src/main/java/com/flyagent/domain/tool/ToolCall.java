@@ -1,6 +1,7 @@
 package com.flyagent.domain.tool;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author FlyAgent Team
  * @since 1.0
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ToolCall {
 
     private final String id;
@@ -43,6 +45,7 @@ public class ToolCall {
     /**
      * 函数调用详情内部类。
      */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class FunctionCall {
 
         private final String name;

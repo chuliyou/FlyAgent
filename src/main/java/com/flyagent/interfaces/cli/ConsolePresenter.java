@@ -5,6 +5,8 @@ import com.flyagent.application.dto.SessionDTO;
 import com.flyagent.domain.session.AgentSession;
 import com.flyagent.infrastructure.deepseek.DeepSeekConfig;
 
+import java.util.List;
+
 /**
  * 控制台展示器。
  *
@@ -98,8 +100,15 @@ public class ConsolePresenter {
      */
     public void printResponse(AgentResponseDTO response) {
         if (response.isSuccess()) {
-            System.out.println();
-            System.out.println(response.getContent());
+            // Print ReAct execution trace if present
+            if (!response.getSteps().isEmpty()) {
+                printReActSteps(response.getSteps());
+            }
+            // Print final answer
+            if (response.getContent() != null && !response.getContent().isEmpty()) {
+                System.out.println("  Final Answer:");
+                System.out.println("  " + response.getContent());
+            }
             if (response.getTokenUsage() != null) {
                 System.out.println();
                 System.out.println("[Tokens: "
@@ -107,10 +116,36 @@ public class ConsolePresenter {
                         + response.getTokenUsage().getCompletionTokens() + " out]");
             }
         } else {
+            // Print partial steps if any
+            if (!response.getSteps().isEmpty()) {
+                printReActSteps(response.getSteps());
+            }
             System.out.println();
             System.out.println("Error: " + response.getErrorMessage());
         }
         System.out.println();
+    }
+
+    /**
+     * 打印 ReAct 执行轨迹。
+     */
+    private void printReActSteps(List<AgentResponseDTO.ReActStepDTO> steps) {
+        System.out.println();
+        for (AgentResponseDTO.ReActStepDTO step : steps) {
+            if (step.getThought() != null && !step.getThought().isEmpty()) {
+                System.out.println("  Thought: " + step.getThought());
+            }
+            if (step.getActionName() != null) {
+                System.out.println("  Action: " + step.getActionName()
+                        + " " + step.getActionArguments());
+            }
+            if (step.getObservation() != null && !step.getObservation().isEmpty()) {
+                System.out.println("  Observation: " + step.getObservation());
+            }
+            if (step.getError() != null && !step.getError().isEmpty()) {
+                System.out.println("  Error: " + step.getError());
+            }
+        }
     }
 
     /**
