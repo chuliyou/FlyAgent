@@ -103,7 +103,8 @@ public class DeepSeekResponseParser {
             try {
                 toolCalls.add(objectMapper.treeToValue(tc, ToolCall.class));
             } catch (Exception e) {
-                throw new ApiException("Failed to parse tool_call", e);
+                throw new ApiException(
+                        "Failed to parse tool_call: " + tc + " — " + e.getMessage(), e);
             }
         }
         return toolCalls;
