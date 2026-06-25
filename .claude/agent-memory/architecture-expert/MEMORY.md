@@ -1,0 +1,1 @@
+- [Project Architecture](project-architecture.md) — FlyAgent 项目整体架构概览，包含 DDD 六边形分层、核心领域模型、技术决策和扩展点
