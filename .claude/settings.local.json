@@ -10,7 +10,15 @@
       "Bash(javac -version)",
       "Bash(\"/j/develop/Java/jdk-17.0.1/bin/java\" -version)",
       "Bash(gh auth *)",
-      "Bash(where gh *)"
+      "Bash(where gh *)",
+      "PowerShell(openspec *)",
+      "PowerShell(npm config *)",
+      "PowerShell(npm list *)",
+      "PowerShell(npx openspec --version)",
+      "PowerShell(node \"J:\\\\develop\\\\NodeJS\\\\node_modules\\\\@fission-ai\\\\openspec\\\\bin\\\\openspec.js\" --version)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }
