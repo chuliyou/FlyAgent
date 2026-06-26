@@ -24,8 +24,6 @@ import com.flyagent.domain.tool.WorkspaceGuard;
 public class DefaultAgent implements Agent {
 
     private static final int DEFAULT_MAX_TURNS = 8;
-    private static final int DEFAULT_MAX_MESSAGES = 20;
-    private static final int DEFAULT_MAX_TOOL_RESULT_CHARS = 4000;
 
     private final ChatModelPort chatModel;
     private final ToolRegistry toolRegistry;
@@ -56,7 +54,7 @@ public class DefaultAgent implements Agent {
         }
 
         // 2. 获取或创建会话
-        SessionId sessionId;
+            SessionId sessionId;
         if (request.getSessionId() != null) {
             sessionId = SessionId.of(request.getSessionId());
         } else {
@@ -74,9 +72,14 @@ public class DefaultAgent implements Agent {
         int maxTurns = request.getMaxTurns() > 0 ? request.getMaxTurns() : DEFAULT_MAX_TURNS;
         AgentTask task = new AgentTask(sessionId, request.getUserInput(), maxTurns);
 
-        // 4. 创建 Conversation
-        Conversation conversation = new Conversation(
-                DEFAULT_MAX_MESSAGES, DEFAULT_MAX_TOOL_RESULT_CHARS);
+        // 4. 获取或创建 Conversation（session 级别生命周期）
+        AgentSession currentSession = sessionService.getCurrentSession();
+        Conversation conversation;
+        if (currentSession != null && currentSession.getConversation() != null) {
+            conversation = currentSession.getConversation();
+        } else {
+            conversation = new Conversation();
+        }
         conversation.addUserMessage(request.getUserInput());
 
         // 5. 创建上下文构建服务

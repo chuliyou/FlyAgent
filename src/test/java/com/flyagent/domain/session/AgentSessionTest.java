@@ -3,6 +3,8 @@ package com.flyagent.domain.session;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.flyagent.domain.agent.Conversation;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -77,5 +79,43 @@ class AgentSessionTest {
 
         assertThat(id1).isEqualTo(id2);
         assertThat(id1.hashCode()).isEqualTo(id2.hashCode());
+    }
+
+    @Test
+    @DisplayName("创建会话时 Conversation 应不为 null")
+    void shouldCreateConversationOnSessionCreation() {
+        Workspace workspace = new Workspace(".");
+        AgentSession session = new AgentSession(workspace);
+
+        Conversation conversation = session.getConversation();
+        assertThat(conversation).isNotNull();
+        assertThat(conversation.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("clearConversation 应清空对话历史")
+    void shouldClearConversationHistory() {
+        Workspace workspace = new Workspace(".");
+        AgentSession session = new AgentSession(workspace);
+        Conversation conversation = session.getConversation();
+        conversation.addUserMessage("Hello");
+        conversation.addAssistantMessage("Hi there");
+        assertThat(conversation.size()).isEqualTo(2);
+
+        session.clearConversation();
+
+        assertThat(conversation.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("多次调用 getConversation 应返回同一实例")
+    void shouldReturnSameConversationInstance() {
+        Workspace workspace = new Workspace(".");
+        AgentSession session = new AgentSession(workspace);
+
+        Conversation conv1 = session.getConversation();
+        Conversation conv2 = session.getConversation();
+
+        assertThat(conv1).isSameAs(conv2);
     }
 }

@@ -4,6 +4,7 @@ import com.flyagent.domain.message.Message;
 import com.flyagent.domain.message.MessageRole;
 import com.flyagent.domain.message.AssistantMessage;
 import com.flyagent.domain.message.ToolMessage;
+import com.flyagent.domain.message.UserMessage;
 import com.flyagent.domain.tool.ToolCall;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -127,5 +128,37 @@ class ConversationTest {
 
         conversation.addAssistantMessage("world");
         assertThat(conversation.size()).isEqualTo(2);
+    }
+
+    @Test
+    void shouldCompactHistoryIntoUserMessage() {
+        conversation.addUserMessage("User question");
+        conversation.addAssistantMessage("Assistant answer");
+        conversation.addToolMessage("call_1", "some result");
+        assertThat(conversation.size()).isEqualTo(3);
+
+        String summary = "Summary: user asked about X, assistant answered Y using tool Z.";
+        conversation.compact(summary);
+
+        // After compact: history cleared, summary appended as UserMessage with prefix
+        List<Message> messages = conversation.getMessages();
+        assertThat(messages).hasSize(1);
+        assertThat(messages.get(0).getRole()).isEqualTo(MessageRole.USER);
+        assertThat(((UserMessage) messages.get(0)).getContent())
+                .startsWith("[Conversation summary]")
+                .contains(summary);
+    }
+
+    @Test
+    void shouldCompactNotModifySystemMessage() {
+        // Verify compact does not touch the systemMessage field (it stays null)
+        conversation.addUserMessage("Hello");
+        conversation.compact("Compacted summary text.");
+
+        // After compact: size=1 (only the summary UserMessage),
+        // systemMessage is still null (not affected by compact)
+        assertThat(conversation.size()).isEqualTo(1);
+        List<Message> messages = conversation.getMessages();
+        assertThat(messages.get(0).getRole()).isEqualTo(MessageRole.USER);
     }
 }

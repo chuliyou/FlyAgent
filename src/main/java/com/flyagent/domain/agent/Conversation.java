@@ -122,6 +122,18 @@ public class Conversation {
     }
 
     /**
+     * 压缩对话历史：清空所有原始历史消息，将 LLM 生成的摘要作为
+     * 一条 UserMessage 追加到 historyMessages 中。
+     * SystemMessage（系统行为提示词）不受影响。
+     *
+     * @param summary LLM 生成的对话摘要
+     */
+    public void compact(String summary) {
+        this.historyMessages.clear();
+        addUserMessage("[Conversation summary]\n" + summary);
+    }
+
+    /**
      * 获取当前消息总数（含 System Message）。
      *
      * @return 消息总数

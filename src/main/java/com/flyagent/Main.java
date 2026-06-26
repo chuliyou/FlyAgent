@@ -72,7 +72,7 @@ public class Main {
         WorkspaceGuard workspaceGuard = new WorkspaceGuard(workspacePath);
 
         // 6. 初始化应用服务
-        SessionAppService sessionService = new SessionAppService();
+        SessionAppService sessionService = new SessionAppService(chatModel);
 
         // 7. 初始化 Agent（注入所有端口）
         Agent agent = new DefaultAgent(chatModel, toolRegistry, sessionService, approvalHandler);

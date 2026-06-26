@@ -18,7 +18,11 @@
       "PowerShell(node \"J:\\\\develop\\\\NodeJS\\\\node_modules\\\\@fission-ai\\\\openspec\\\\bin\\\\openspec.js\" --version)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(Get-ChildItem -Recurse -Name -File)",
+      "Bash(Select-Object -First 80)",
+      "Bash(openspec new *)",
+      "PowerShell(mvn test *)"
     ]
   }
 }

@@ -6,6 +6,7 @@ import com.flyagent.application.service.AgentAppService;
 import com.flyagent.application.service.SessionAppService;
 import com.flyagent.common.exception.ApiException;
 import com.flyagent.common.exception.ConfigException;
+import com.flyagent.domain.agent.Conversation;
 import com.flyagent.domain.session.AgentSession;
 import com.flyagent.infrastructure.deepseek.DeepSeekConfig;
 
@@ -54,7 +55,8 @@ public class AgentCli {
         AgentSession session = sessionService.startSession(workspacePath);
         presenter.printWelcome(session, config);
 
-        try (Scanner scanner = new Scanner(System.in)) {
+        Scanner scanner = new Scanner(System.in);
+        try {
             while (running) {
                 presenter.printPrompt();
                 if (!scanner.hasNextLine()) {
@@ -70,7 +72,7 @@ public class AgentCli {
 
                 switch (command.getType()) {
                     case BUILTIN:
-                        handleBuiltin(command.getBuiltinCommand());
+                        handleBuiltin(command.getBuiltinCommand(), scanner);
                         break;
                     case USER_INPUT:
                         handleUserInput(command.getUserInput());
@@ -79,18 +81,23 @@ public class AgentCli {
                         break;
                 }
             }
+        } finally {
+            scanner.close();
         }
 
         sessionService.closeSession();
     }
 
-    private void handleBuiltin(BuiltinCommand cmd) {
+    private void handleBuiltin(BuiltinCommand cmd, Scanner scanner) {
         switch (cmd) {
             case HELP:
                 presenter.printHelp();
                 break;
             case CLEAR:
-                presenter.printClear();
+                handleClear(scanner);
+                break;
+            case COMPACT:
+                handleCompact(scanner);
                 break;
             case EXIT:
                 presenter.printGoodbye();
@@ -117,6 +124,63 @@ public class AgentCli {
             default:
                 break;
         }
+    }
+
+    /**
+     * 处理 /clear 命令：确认后清空对话历史。
+     */
+    private void handleClear(Scanner scanner) {
+        if (!confirmAction("clear all conversation history", scanner)) {
+            presenter.printCancelled();
+            return;
+        }
+        sessionService.clearConversation();
+        presenter.printClear();
+    }
+
+    /**
+     * 处理 /compact 命令：确认后压缩对话历史为摘要。
+     */
+    private void handleCompact(Scanner scanner) {
+        if (!confirmAction("compact conversation history", scanner)) {
+            presenter.printCancelled();
+            return;
+        }
+
+        Conversation conv = sessionService.getCurrentSession() != null
+                ? sessionService.getCurrentSession().getConversation() : null;
+        if (conv == null || conv.getMessages().isEmpty()) {
+            presenter.printCompactEmpty();
+            return;
+        }
+
+        presenter.printCompactStart();
+        try {
+            String result = sessionService.compactConversation(workspacePath);
+            presenter.printCompactDone(result);
+        } catch (Exception e) {
+            presenter.printApiError("Compact failed: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 用户确认提示：输出确认信息，等待 y/n 输入。
+     *
+     * @param action  描述待确认操作的文本
+     * @param scanner 共享的输入扫描器
+     * @return true 表示用户确认
+     */
+    private boolean confirmAction(String action, Scanner scanner) {
+        presenter.printConfirm(action);
+        try {
+            if (scanner.hasNextLine()) {
+                String response = scanner.nextLine().trim().toLowerCase();
+                return "y".equals(response) || "yes".equals(response);
+            }
+        } catch (Exception ignored) {
+            // If we can't read input, deny the action
+        }
+        return false;
     }
 
     private void handleUserInput(String input) {

@@ -98,6 +98,44 @@ class DefaultAgentTest {
     }
 
     @Test
+    void shouldShareConversationAcrossMultipleRunCalls() {
+        // First run: simple answer
+        AssistantMessage msg1 = AssistantMessage.ofText("First answer");
+        ChatChoice choice1 = new ChatChoice(0, msg1, "stop");
+        ChatResponse response1 = new ChatResponse("resp_1", "model", List.of(choice1), null);
+        when(chatModel.chat(any())).thenReturn(response1);
+
+        AgentRequest request1 = AgentRequest.builder()
+                .userInput("First question")
+                .workspace(tempDir)
+                .build();
+        AgentResponse result1 = agent.run(request1);
+        assertThat(result1.isSuccess()).isTrue();
+        assertThat(result1.getFinalAnswer()).isEqualTo("First answer");
+
+        // Verify conversation contains messages from first run
+        Conversation conv = sessionService.getCurrentSession().getConversation();
+        assertThat(conv.size()).isGreaterThanOrEqualTo(2); // user + assistant
+
+        // Second run: another answer
+        AssistantMessage msg2 = AssistantMessage.ofText("Second answer");
+        ChatChoice choice2 = new ChatChoice(0, msg2, "stop");
+        ChatResponse response2 = new ChatResponse("resp_2", "model", List.of(choice2), null);
+        when(chatModel.chat(any())).thenReturn(response2);
+
+        AgentRequest request2 = AgentRequest.builder()
+                .userInput("Second question")
+                .workspace(tempDir)
+                .build();
+        AgentResponse result2 = agent.run(request2);
+        assertThat(result2.isSuccess()).isTrue();
+        assertThat(result2.getFinalAnswer()).isEqualTo("Second answer");
+
+        // Verify conversation now contains messages from BOTH runs
+        assertThat(conv.size()).isGreaterThanOrEqualTo(4); // user1 + asst1 + user2 + asst2
+    }
+
+    @Test
     void shouldReturnErrorWhenNoActiveSessionButWorkspaceProvided() {
         // Close the existing session
         sessionService.closeSession();
