@@ -21,5 +21,8 @@ public enum BuiltinCommand {
     PWD,
 
     /** 显示当前会话信息 */
-    SESSION
+    SESSION,
+
+    /** 压缩对话历史 */
+    COMPACT
 }

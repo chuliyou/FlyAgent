@@ -42,6 +42,9 @@ public final class CommandParser {
         if (isSession(trimmed)) {
             return ParsedCommand.builtin(BuiltinCommand.SESSION);
         }
+        if (isCompact(trimmed)) {
+            return ParsedCommand.builtin(BuiltinCommand.COMPACT);
+        }
 
         // 默认：自然语言用户输入
         return ParsedCommand.userInput(trimmed);
@@ -66,5 +69,9 @@ public final class CommandParser {
 
     private static boolean isSession(String input) {
         return "/session".equals(input);
+    }
+
+    private static boolean isCompact(String input) {
+        return "/compact".equals(input) || "compact".equalsIgnoreCase(input);
     }
 }

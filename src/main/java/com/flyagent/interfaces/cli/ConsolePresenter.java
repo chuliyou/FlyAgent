@@ -48,6 +48,7 @@ public class ConsolePresenter {
         System.out.println("Available commands:");
         System.out.println("  /help      Show this help");
         System.out.println("  /clear     Clear current session context");
+        System.out.println("  /compact   Compress conversation history into a summary");
         System.out.println("  /exit      Exit FlyAgent");
         System.out.println("  /pwd       Show current workspace");
         System.out.println("  /session   Show current session info");
@@ -91,6 +92,52 @@ public class ConsolePresenter {
      */
     public void printGoodbye() {
         System.out.println("Goodbye!");
+    }
+
+    /**
+     * 打印压缩开始提示。
+     */
+    public void printCompactStart() {
+        System.out.println("Compacting conversation history...");
+    }
+
+    /**
+     * 打印压缩完成结果。
+     *
+     * @param result 压缩结果字符串
+     */
+    public void printCompactDone(String result) {
+        System.out.println(result);
+    }
+
+    /**
+     * 打印压缩取消提示。
+     */
+    public void printCompactCancelled() {
+        System.out.println("Compact cancelled.");
+    }
+
+    /**
+     * 打印压缩空历史提示。
+     */
+    public void printCompactEmpty() {
+        System.out.println("Nothing to compact — conversation is already empty.");
+    }
+
+    /**
+     * 打印确认提示。
+     *
+     * @param action 描述待确认操作的文本
+     */
+    public void printConfirm(String action) {
+        System.out.print("Are you sure you want to " + action + "? (y/n) ");
+    }
+
+    /**
+     * 打印取消提示。
+     */
+    public void printCancelled() {
+        System.out.println("Cancelled.");
     }
 
     /**
